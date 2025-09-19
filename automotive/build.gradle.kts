@@ -52,6 +52,9 @@ dependencies {
     implementation(libs.compose.activity)
     implementation(libs.compose)
     implementation(libs.compose.tooling)
+
+    implementation(libs.tts)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     testImplementation(libs.junit)
