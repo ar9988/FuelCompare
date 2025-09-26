@@ -14,7 +14,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FuelCompare">
 
-        <activity android:name=".feature.MainActivity"
+        <activity android:name=".presentation.main.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

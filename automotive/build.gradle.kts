@@ -52,8 +52,11 @@ dependencies {
     implementation(libs.compose.activity)
     implementation(libs.compose)
     implementation(libs.compose.tooling)
-
-    implementation(libs.tts)
+    implementation(libs.nav)
+    implementation(libs.material)
+    implementation(libs.icons.core)
+    implementation(libs.icons.extended)
+//    implementation(libs.tts)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
