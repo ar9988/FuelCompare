@@ -23,7 +23,8 @@ fun MyApp() {
     val navController = rememberNavController()
     val items = listOf(
         Screen.Home,
-        Screen.Detail
+        Screen.Detail,
+        Screen.Tip
     )
     Scaffold(
         bottomBar = {

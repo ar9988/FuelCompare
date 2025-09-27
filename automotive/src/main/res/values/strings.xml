@@ -1,3 +1,22 @@
 <resources>
     <string name="app_name">FuelCompare</string>
+
+    <string name="pleos_connect">Pleos connect</string>
+    <string name="unit_km_per_liter">km/L</string>
+
+    <!-- Content Descriptions for Accessibility -->
+    <string name="content_desc_fuel">연료</string>
+    <string name="content_desc_evaluation">주행 평가</string>
+    <string name="content_desc_record">기록 아이콘</string>
+    <string name="content_desc_compare">비교 아이콘</string>
+
+    <!-- Dashboard Screen -->
+    <string name="dashboard_evaluation_title">주행 평가</string>
+    <string name="dashboard_evaluation_good">좋음! 😊</string>
+    <string name="dashboard_tip_message">급가속을 줄이면 연비 UP!</string>
+
+    <!-- Bottom Navigation -->
+    <string name="bottom_nav_record">기록</string>
+    <string name="bottom_nav_compare">비교</string>
+    <string name="bottom_nav_tip">팁</string>
 </resources>
