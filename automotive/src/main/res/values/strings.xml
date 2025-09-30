@@ -19,4 +19,16 @@
     <string name="bottom_nav_record">기록</string>
     <string name="bottom_nav_compare">비교</string>
     <string name="bottom_nav_tip">팁</string>
+
+
+    <string name="record_screen_title">상세 주행 기록</string>
+    <string name="record_toggle_daily">일별</string>
+    <string name="record_toggle_monthly">월별</string>
+    <string name="record_card_purpose">용도</string>
+    <string name="record_card_duration">1연전 08:30</string>
+    <string name="record_card_distance_short">35 km</string>
+    <string name="record_card_distance_long">35 km</string>
+    <string name="record_achievement_card_title">개선 효율 굿! 🏆</string>
+    <string name="record_achievement_card_date">2024.07.20</string>
+    <string name="record_achievement_card_fuel">17.5 kmL</string>
 </resources>

@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -25,6 +26,7 @@ import androidx.navigation.NavController
 import com.example.fuelcompare.R
 import com.example.fuelcompare.presentation.theme.appColors
 import kotlin.math.cos
+import kotlin.math.min
 import kotlin.math.sin
 
 @Composable
@@ -44,7 +46,6 @@ fun FuelEfficiencyDashboard() {
                 .fillMaxSize()
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            // [적용] 콘텐츠를 수직 중앙으로 정렬
             verticalArrangement = Arrangement.Center
         ) {
             // 상단 로고
@@ -99,26 +100,38 @@ fun FuelGauge(
     val totalTicks = 50 // 전체 눈금 수
 
     Canvas(modifier = modifier.fillMaxSize(0.8f)) {
-        // 배경 게이지 Arc
+
+        val diameter = min(size.width, size.height) // 정사각형 크기
+        val arcSize = Size(diameter, diameter)
+        val topLeft = Offset(
+            (size.width - diameter) / 2,
+            (size.height - diameter) / 2
+        )
+
+
         drawArc(
             color = gaugeBackgroundColor,
             startAngle = startAngle,
             sweepAngle = sweepAngle,
             useCenter = false,
+            topLeft = topLeft,
+            size = arcSize,
             style = Stroke(width = 20f, cap = StrokeCap.Round)
         )
 
-        // 현재 연비 진행 상태 Arc
         drawArc(
             color = primaryColor,
             startAngle = startAngle,
             sweepAngle = sweepAngle * progress,
             useCenter = false,
+            topLeft = topLeft,
+            size = arcSize,
             style = Stroke(width = 20f, cap = StrokeCap.Round)
         )
 
         // 눈금 그리기 (이하 동일)
-        val tickRadius = size.width / 2
+        val arcRadius = diameter / 2
+        val tickRadius = arcRadius
         for (i in 0..totalTicks) {
             val angleFraction = i.toFloat() / totalTicks
             val angleInDegrees = startAngle + angleFraction * sweepAngle
