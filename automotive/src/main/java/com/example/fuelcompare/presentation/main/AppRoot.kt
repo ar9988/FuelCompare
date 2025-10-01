@@ -19,7 +19,7 @@ import com.example.fuelcompare.presentation.home.HomeScreen
 import com.example.fuelcompare.presentation.tip.TipScreen
 
 @Composable
-fun MyApp() {
+fun AppRoot() {
     val navController = rememberNavController()
     val items = listOf(
         Screen.Home,

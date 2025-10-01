@@ -6,6 +6,7 @@
         android:required="true" />
 
     <application
+        android:name=".presentation.main.FuelCompareApp"
         android:allowBackup="true"
         android:appCategory="audio"
         android:icon="@mipmap/ic_launcher"

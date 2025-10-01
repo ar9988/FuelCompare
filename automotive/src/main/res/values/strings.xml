@@ -31,4 +31,28 @@
     <string name="record_achievement_card_title">개선 효율 굿! 🏆</string>
     <string name="record_achievement_card_date">2024.07.20</string>
     <string name="record_achievement_card_fuel">17.5 kmL</string>
+
+
+
+    <!-- Tip Screen -->
+    <string name="tip_screen_user_summary_title">%1$s님의 운전 습관 요약</string>
+    <string name="tip_screen_recommendation_title">연비 개선을 위한 추천 팁</string>
+
+    <!-- Habit Summary Cards -->
+    <string name="habit_harsh_acceleration_title">급가속 %1$d회 감지</string>
+    <string name="habit_harsh_acceleration_desc">조금만 더 부드럽게 출발해보세요.</string>
+    <string name="habit_coasting_title">타력 주행 %1$d회 감지</string>
+    <string name="habit_coasting_desc">아주 좋은 습관을 가지고 있어요!</string>
+
+    <!-- Recommendation Tip Cards -->
+    <string name="rec_tip_gentle_start_title">부드러운 출발!</string>
+    <string name="rec_tip_gentle_start_desc">급가속 대신 서서히 속도를 높여 연료 소모를 줄여보세요.</string>
+    <string name="rec_tip_steady_speed_title">정속 주행 유지</string>
+    <string name="rec_tip_steady_speed_desc">고속도로에선 80~100km/h를 유지하는 것이 가장 효율적입니다.</string>
+    <string name="rec_tip_no_idling_title">불필요 공회전 금지</string>
+    <string name="rec_tip_no_idling_desc">정차 시 기어를 중립(N)에 두는 습관이 연료를 아낍니다.</string>
+
+    <!-- Content Descriptions for Accessibility -->
+    <string name="content_desc_harsh_acceleration">급가속 아이콘</string>
+    <string name="content_desc_coasting">타력 주행 아이콘</string>
 </resources>
