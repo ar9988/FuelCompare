@@ -57,6 +57,9 @@ dependencies {
     implementation(libs.icons.core)
     implementation(libs.icons.extended)
 //    implementation(libs.tts)
+    implementation(libs.vehicle)
+    implementation("androidx.car.app:app-automotive:1.7.0")
+    //
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
