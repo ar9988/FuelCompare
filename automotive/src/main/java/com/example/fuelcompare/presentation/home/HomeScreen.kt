@@ -38,31 +38,19 @@ fun HomeScreen(navController: NavController) {
 fun FuelEfficiencyDashboard() {
     Surface(
         modifier = Modifier.fillMaxSize(),
-        // [적용] 테마의 background 색상 사용
         color = MaterialTheme.colorScheme.background
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // 상단 로고
-            Text(
-                text = stringResource(id = R.string.pleos_connect),
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                style = MaterialTheme.typography.labelMedium
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // 중앙 게이지 및 정보 섹션
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(1.5f) // 화면 비율에 따라 크기 조절
+                    .weight(1f)
             ) {
                 FuelGauge(
                     progress = 0.75f, // 0.0 ~ 1.0 사이의 값으로 연비 상태 표현
@@ -73,15 +61,6 @@ fun FuelEfficiencyDashboard() {
                     primaryColor = MaterialTheme.appColors.informativeActive
                 )
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // 하단 팁 텍스트
-            Text(
-                text = stringResource(id = R.string.dashboard_tip_message),
-                color = MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.bodyLarge
-            )
         }
     }
 }

@@ -6,8 +6,8 @@ plugins {
 
 android {
     namespace = "com.example.data"
-    compileSdk = 36
-
+    compileSdk = 34
+    useLibrary("android.car")
     defaultConfig {
         minSdk = 34
 
@@ -25,24 +25,18 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
 }
 
 dependencies {
     implementation(project(":domain"))
-    compileOnly(files("libs/android.car.jar"))
 
-    //
-    implementation("androidx.car.app:app-projected:1.7.0")
-    implementation("androidx.car.app:app-automotive:1.7.0")
-    //
-
-
+    implementation(libs.androidx.app)
     implementation(libs.dagger.hilt.android)
     ksp(libs.dagger.hilt.compiler)
     implementation(libs.androidx.core.ktx)

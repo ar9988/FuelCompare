@@ -43,6 +43,8 @@ android {
 }
 
 dependencies {
+    implementation(project(":data"))
+    implementation(project(":domain"))
     val composeBom = platform(libs.compose.bom)
     implementation(composeBom)
     androidTestImplementation(composeBom)
@@ -56,9 +58,6 @@ dependencies {
     implementation(libs.material)
     implementation(libs.icons.core)
     implementation(libs.icons.extended)
-    implementation(libs.vehicle)
-    implementation(libs.speechtotext)
-//    implementation(libs.tts)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

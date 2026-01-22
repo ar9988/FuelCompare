@@ -1,4 +1,9 @@
 <resources>
 
     <style name="Theme.FuelCompare" parent="android:Theme.Material.Light.DarkActionBar" />
+
+    <style name="Theme.FuelCompare.NoActionBar" parent="Theme.Material3.DayNight.NoActionBar">
+    <item name="windowActionBar">false</item>
+    <item name="windowNoTitle">true</item>
+    </style>
 </resources>

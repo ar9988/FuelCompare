@@ -63,7 +63,7 @@ fun DrivingTipScreen(userName: String) {
                     modifier = Modifier.weight(1f),
                     title = stringResource(R.string.habit_harsh_acceleration_title, 5),
                     description = stringResource(R.string.habit_harsh_acceleration_desc),
-                    icon = Icons.Default.TrendingDown,
+                    icon = Icons.Default.   TrendingDown,
                     iconDesc = stringResource(R.string.content_desc_harsh_acceleration),
                     cardColor = MaterialTheme.appColors.regulationRed.copy(alpha = 0.8f),
                     borderColor = MaterialTheme.appColors.regulationRed

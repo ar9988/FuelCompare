@@ -1,7 +1,6 @@
 <resources>
     <string name="app_name">FuelCompare</string>
 
-    <string name="pleos_connect">Pleos connect</string>
     <string name="unit_km_per_liter">km/L</string>
 
     <!-- Content Descriptions for Accessibility -->
@@ -55,4 +54,14 @@
     <!-- Content Descriptions for Accessibility -->
     <string name="content_desc_harsh_acceleration">급가속 아이콘</string>
     <string name="content_desc_coasting">타력 주행 아이콘</string>
+
+    <string name="driving_event_normal"/>
+    <string name="driving_event_harsh_accel">급가속입니다. 가속을 줄이면 연비에 도움이 됩니다.</string>
+    <string name="driving_event_harsh_brake">급감속입니다. 부드럽게 운전해 주세요.</string>
+    <string name="driving_event_inertial_driving">타력 주행으로 에너지를 절약하고 있습니다.</string>
+    <string name="driving_event_constant_speed_driving">정속 주행 중입니다. 최고의 연비 구간입니다.</string>
+    <string name="driving_event_excessive_idling">공회전이 1분 이상 지속되었습니다. 불필요한 공회전은 줄여주세요.</string>
+
+    <string name="fuel_efficiency_text">연비는 %.2f km/l 입니다.</string>
+
 </resources>
