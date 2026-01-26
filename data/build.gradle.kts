@@ -36,6 +36,9 @@ android {
 dependencies {
     implementation(project(":domain"))
 
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.app)
     implementation(libs.dagger.hilt.android)
     ksp(libs.dagger.hilt.compiler)

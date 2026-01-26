@@ -1,6 +1,7 @@
 package com.example.data.repository
 
 import android.car.Car
+import com.example.domain.model.VehicleIgnitionState
 import android.car.VehiclePropertyIds
 import android.car.hardware.CarPropertyValue
 import android.car.hardware.property.CarPropertyManager
@@ -8,9 +9,11 @@ import android.content.Context
 import android.util.Log
 import com.example.domain.repository.CarRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -22,13 +25,22 @@ class CarRepositoryImpl @Inject constructor(
     private var car: Car? = null
     private var carPropertyManager: CarPropertyManager? = null
 
+    // --- 실시간 데이터 공유를 위한 Flow들 (상태 보존형) ---
+    private val _fuelEfficiency = MutableStateFlow(0f)
+    override val fuelEfficiency: StateFlow<Float> = _fuelEfficiency.asStateFlow()
+
+    private val _speedFlow = MutableSharedFlow<Float>(replay = 1)
+    private val _rpmFlow = MutableSharedFlow<Float>(replay = 1)
+    private val _gearFlow = MutableSharedFlow<Int>(replay = 1)
+    private val _fuelLevelFlow = MutableSharedFlow<Float>(replay = 1)
+    private val _ignitionFlow = MutableStateFlow(VehicleIgnitionState.UNDEFINED)
+    override val ignitionState: StateFlow<VehicleIgnitionState> = _ignitionFlow.asStateFlow()
+
+    // --- 연비 계산용 세션 변수 ---
     private var startFuelLevel: Float? = null
+    private var latestFuelLevel: Float? = null
     private var totalDistanceMeters: Double = 0.0
-    private var lastSpeedTimestamp: Long = 0L
-
-
-    private val ACCELERATOR_PEDAL_POS = 291504645
-    private val BRAKE_PEDAL_ANY_POSITION = 287310337
+    private var lastUpdateTimestamp = 0L
 
     init {
         connectToCarService()
@@ -39,125 +51,104 @@ class CarRepositoryImpl @Inject constructor(
             if (ready) {
                 try {
                     carPropertyManager = connectedCar.getCarManager(CarPropertyManager::class.java)
-
-                    val configList = carPropertyManager?.getPropertyList()
-                    Log.d("CarAPI", "📊 허용된 속성 개수: ${configList?.size}")
-                    configList?.forEach { config ->
-                        Log.d("CarAPI", "✅ 허용된 속성: ${config.propertyId} (${config.propertyId == 291504647})")
-                    }
-
+                    registerAllCallbacks()
+                    Log.d("CarAPI", "✅ 모든 센서 모니터링 통합 시작")
                 } catch (e: Exception) {
-                    Log.e("CarAPI", "Failed to get CarPropertyManager", e)
+                    Log.e("CarAPI", "❌ 매니저 획득 실패", e)
                 }
             }
         }
     }
 
-    private suspend fun waitForManager(): CarPropertyManager {
-        while (carPropertyManager == null) {
-            kotlinx.coroutines.delay(100)
-        }
-        return carPropertyManager!!
-    }
-
-    // observeSpeed: UseCase가 이 데이터를 받아서 가속도를 계산합니다.
-    override fun observeSpeed(): Flow<Float> = callbackFlow {
-        val manager = waitForManager()
+    private fun registerAllCallbacks() {
+        val manager = carPropertyManager ?: return
         val callback = object : CarPropertyManager.CarPropertyEventCallback {
             override fun onChangeEvent(value: CarPropertyValue<*>) {
-                if (value.propertyId == VehiclePropertyIds.PERF_VEHICLE_SPEED) {
-                    val speed = value.value as Float // m/s
-
-                    // 거리 계산 로직
-                    val currentTime = System.currentTimeMillis()
-                    if (lastSpeedTimestamp != 0L) {
-                        val timeDiffSeconds = (currentTime - lastSpeedTimestamp) / 1000.0
-                        totalDistanceMeters += speed * timeDiffSeconds
-                    }
-                    lastSpeedTimestamp = currentTime
-
-                    // 로그 추가: 데이터가 리포지토리에서 나가는지 확인
-                    Log.d("CarAPI", "🚀 Speed 전송: $speed m/s")
-                    trySend(speed)
+                synchronized(this@CarRepositoryImpl) {
+                    processVehicleEvent(value)
                 }
             }
             override fun onErrorEvent(propId: Int, zone: Int) {}
         }
 
-        manager.registerCallback(callback, VehiclePropertyIds.PERF_VEHICLE_SPEED, CarPropertyManager.SENSOR_RATE_UI)
-        awaitClose { manager.unregisterCallback(callback) }
+        // 모든 필요한 센서 등록
+        val properties = listOf(
+            VehiclePropertyIds.PERF_VEHICLE_SPEED to CarPropertyManager.SENSOR_RATE_UI,
+            VehiclePropertyIds.FUEL_LEVEL to CarPropertyManager.SENSOR_RATE_NORMAL,
+            VehiclePropertyIds.ENGINE_RPM to CarPropertyManager.SENSOR_RATE_UI,
+            VehiclePropertyIds.GEAR_SELECTION to CarPropertyManager.SENSOR_RATE_ONCHANGE,
+            VehiclePropertyIds.IGNITION_STATE to CarPropertyManager.SENSOR_RATE_ONCHANGE
+        )
+
+        properties.forEach { (id, rate) ->
+            manager.registerCallback(callback, id, rate)
+        }
     }
 
-    override fun observeFuelLevel(): Flow<Float> = callbackFlow {
-        val manager = waitForManager()
-        val callback = object : CarPropertyManager.CarPropertyEventCallback {
-            override fun onChangeEvent(value: CarPropertyValue<*>) {
-                if (value.propertyId == VehiclePropertyIds.FUEL_LEVEL) {
-                    val currentFuel = value.value as Float
-                    if (startFuelLevel == null) startFuelLevel = currentFuel
-                    Log.d("CarAPI", "⛽ Fuel 전송: $currentFuel")
-                    trySend(currentFuel)
+    private fun processVehicleEvent(value: CarPropertyValue<*>) {
+        val currentTime = System.currentTimeMillis()
+
+        when (value.propertyId) {
+            VehiclePropertyIds.PERF_VEHICLE_SPEED -> {
+                val speed = value.value as Float
+                if (lastUpdateTimestamp != 0L) {
+                    val deltaTime = (currentTime - lastUpdateTimestamp) / 1000.0
+                    if (deltaTime > 0) totalDistanceMeters += (speed * deltaTime)
                 }
+                lastUpdateTimestamp = currentTime
+                _speedFlow.tryEmit(speed)
             }
-            override fun onErrorEvent(propId: Int, zone: Int) {}
+            VehiclePropertyIds.FUEL_LEVEL -> {
+                val fuel = value.value as Float
+                if (startFuelLevel == null) startFuelLevel = fuel
+                latestFuelLevel = fuel
+                _fuelLevelFlow.tryEmit(fuel)
+            }
+            VehiclePropertyIds.ENGINE_RPM -> {
+                _rpmFlow.tryEmit(value.value as Float)
+            }
+            VehiclePropertyIds.GEAR_SELECTION -> {
+                _gearFlow.tryEmit(value.value as Int)
+            }
+            VehiclePropertyIds.IGNITION_STATE -> {
+                val rawValue = value.value as Int
+                val state = VehicleIgnitionState.fromInt(rawValue)
+                _ignitionFlow.value = state
+            }
         }
 
-        manager.registerCallback(callback, VehiclePropertyIds.FUEL_LEVEL, CarPropertyManager.SENSOR_RATE_NORMAL)
-        awaitClose { manager.unregisterCallback(callback) }
+        // 어떤 데이터가 들어오든 최신 상태로 연비 갱신
+        updateEfficiency()
     }
 
-    override fun getEfficiency(): Flow<Float> = callbackFlow {
-        val manager = waitForManager()
-        val callback = object : CarPropertyManager.CarPropertyEventCallback {
-            override fun onChangeEvent(value: CarPropertyValue<*>) {
-                val currentFuel = if (value.propertyId == VehiclePropertyIds.FUEL_LEVEL) value.value as Float else null
+    private fun updateEfficiency() {
+        val start = startFuelLevel ?: return
+        val current = latestFuelLevel ?: return
+        val consumed = start - current
 
-                if (startFuelLevel != null && totalDistanceMeters > 0) {
-                    val fuelConsumedMl = startFuelLevel!! - (currentFuel ?: startFuelLevel!!)
-                    if (fuelConsumedMl > 0) {
-                        val distanceKm = totalDistanceMeters / 1000.0
-                        val fuelLiters = fuelConsumedMl / 1000.0
-                        val efficiency = (distanceKm / fuelLiters).toFloat()
-                        trySend(efficiency)
-                    } else {
-                        trySend(0f)
-                    }
-                }
+        // 1. 연료 소모가 발생했고, 2. 주행 거리가 있을 때만 계산
+        if (consumed > 0 && totalDistanceMeters > 0) {
+            val distanceKm = totalDistanceMeters / 1000.0
+            val fuelLiters = consumed / 1000.0
+            val efficiency = (distanceKm / fuelLiters).toFloat()
+
+            if (efficiency in 0f..100f) {
+                _fuelEfficiency.value = efficiency
             }
-            override fun onErrorEvent(propId: Int, zone: Int) {}
         }
-
-        manager.registerCallback(callback, VehiclePropertyIds.PERF_VEHICLE_SPEED, CarPropertyManager.SENSOR_RATE_UI)
-        manager.registerCallback(callback, VehiclePropertyIds.FUEL_LEVEL, CarPropertyManager.SENSOR_RATE_NORMAL)
-        awaitClose { manager.unregisterCallback(callback) }
     }
 
-    override fun observeEngineRpm(): Flow<Float> = callbackFlow {
-        val manager = waitForManager()
-        val callback = object : CarPropertyManager.CarPropertyEventCallback {
-            override fun onChangeEvent(value: CarPropertyValue<*>) {
-                if (value.propertyId == VehiclePropertyIds.ENGINE_RPM) {
-                    trySend(value.value as Float)
-                }
-            }
-            override fun onErrorEvent(p0: Int, p1: Int) {}
-        }
-        manager.registerCallback(callback, VehiclePropertyIds.ENGINE_RPM, CarPropertyManager.SENSOR_RATE_UI)
-        awaitClose { manager.unregisterCallback(callback) }
-    }
+    override fun observeSpeed(): Flow<Float> = _speedFlow
+    override fun observeFuelLevel(): Flow<Float> = _fuelLevelFlow
+    override fun observeEngineRpm(): Flow<Float> = _rpmFlow
+    override fun observeGear(): Flow<Int> = _gearFlow
+    override fun getEfficiency(): Flow<Float> = fuelEfficiency
+    override fun getTotalDistance(): Double = totalDistanceMeters
 
-    override fun observeGear(): Flow<Int> = callbackFlow {
-        val manager = waitForManager()
-        val callback = object : CarPropertyManager.CarPropertyEventCallback {
-            override fun onChangeEvent(value: CarPropertyValue<*>) {
-                if (value.propertyId == VehiclePropertyIds.GEAR_SELECTION) {
-                    trySend(value.value as Int)
-                }
-            }
-            override fun onErrorEvent(p0: Int, p1: Int) {}
-        }
-        manager.registerCallback(callback, VehiclePropertyIds.GEAR_SELECTION, CarPropertyManager.SENSOR_RATE_ONCHANGE)
-        awaitClose { manager.unregisterCallback(callback) }
+    fun resetTrip() {
+        startFuelLevel = latestFuelLevel
+        totalDistanceMeters = 0.0
+        lastUpdateTimestamp = System.currentTimeMillis()
+        _fuelEfficiency.value = 0f
     }
-
 }

@@ -1,36 +1,36 @@
 package com.example.fuelcompare.presentation.main
 
-import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.domain.model.DrivingAlert
+import com.example.domain.model.TripEndResult
 import com.example.domain.model.VoiceCommandResult
 import com.example.domain.usecase.MonitorCoastingUseCase
 import com.example.domain.usecase.MonitorCruiseDrivingUseCase
 import com.example.domain.usecase.MonitorDrivingHabitUseCase
 import com.example.domain.usecase.MonitorIdlingUseCase
+import com.example.domain.usecase.MonitorTripLifecycleUseCase
 import com.example.domain.usecase.ProcessFuelVoiceCommandUseCase
 import com.example.domain.usecase.SpeakTextUseCase
 import com.example.domain.util.ResourceProvider
 import com.example.fuelcompare.R
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class VoiceAssistantViewModel @Inject constructor(
+class DrivingAssistantViewModel @Inject constructor(
     private val resourceProvider: ResourceProvider,
     private val monitorDrivingHabitUseCase: MonitorDrivingHabitUseCase,
     private val processFuelVoiceCommandUseCase: ProcessFuelVoiceCommandUseCase,
     private val monitorCoastingUseCase: MonitorCoastingUseCase,
     private val monitorIdlingUseCase: MonitorIdlingUseCase,
     private val monitorCruiseDrivingUseCase: MonitorCruiseDrivingUseCase,
+    private val monitorTripLifecycleUseCase: MonitorTripLifecycleUseCase,
     private val speakTextUseCase: SpeakTextUseCase,
     private val mainReducer: MainReducer
 ) : ViewModel() {
@@ -39,6 +39,7 @@ class VoiceAssistantViewModel @Inject constructor(
 
     init {
         startMonitoring()
+        observeTripEnd()
     }
 
     private fun dispatch(action: MainAction) {
@@ -60,6 +61,22 @@ class VoiceAssistantViewModel @Inject constructor(
             }
             else -> {
 
+            }
+        }
+    }
+
+    private fun observeTripEnd() {
+        viewModelScope.launch {
+            monitorTripLifecycleUseCase().collect { result ->
+                when (result) {
+                    is TripEndResult.Success -> {
+                        Log.d("ViewModel", "운행 종료 및 데이터 저장 완료")
+                        // 필요하다면 UI에 "운행 요약이 저장되었습니다" 팝업 알림 Action 전송
+                    }
+                    is TripEndResult.Error -> {
+                        Log.e("ViewModel", "저장 실패: ${result.message}")
+                    }
+                }
             }
         }
     }
@@ -91,6 +108,11 @@ class VoiceAssistantViewModel @Inject constructor(
             monitorCoastingUseCase().collect { alert ->
                 handleAlert(alert)
             }
+        }
+
+        // 5. 주행 종료 모니터링
+        viewModelScope.launch {
+
         }
     }
 

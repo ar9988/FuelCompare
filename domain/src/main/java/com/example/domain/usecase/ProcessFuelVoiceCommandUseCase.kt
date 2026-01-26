@@ -2,7 +2,6 @@ package com.example.domain.usecase
 
 import com.example.domain.model.SpeechState
 import com.example.domain.model.VoiceCommandResult
-import com.example.domain.repository.CarRepository
 import com.example.domain.service.SpeechService
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -12,7 +11,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class ProcessFuelVoiceCommandUseCase @Inject constructor(
-    private val carRepository: CarRepository,
+    private val getFuelEfficiencyUseCase: GetFuelEfficiencyUseCase,
     private val speechService: SpeechService
 ) {
     operator fun invoke(): Flow<VoiceCommandResult> = callbackFlow {
@@ -23,7 +22,7 @@ class ProcessFuelVoiceCommandUseCase @Inject constructor(
                     is SpeechState.Success -> {
                         val text = state.text
                         if (text.contains("연비")) {
-                            val efficiency = carRepository.getEfficiency().first()
+                            val efficiency = getFuelEfficiencyUseCase().first()
                             trySend(VoiceCommandResult.FuelEfficiency(efficiency))
                         } else {
                             trySend(VoiceCommandResult.Misunderstood)

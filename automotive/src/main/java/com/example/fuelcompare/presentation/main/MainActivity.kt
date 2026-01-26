@@ -19,7 +19,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    private val mainViewModel: VoiceAssistantViewModel by viewModels()
+    private val mainViewModel: DrivingAssistantViewModel by viewModels()
 
     // 1. 여러 권한을 요청할 수 있는 런처로 변경
     private val requestPermissionsLauncher = registerForActivityResult(
