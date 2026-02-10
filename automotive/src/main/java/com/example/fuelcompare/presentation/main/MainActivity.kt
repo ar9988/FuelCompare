@@ -19,7 +19,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    private val mainViewModel: DrivingAssistantViewModel by viewModels()
+    private val drivingAssistantViewModel: DrivingAssistantViewModel by viewModels()
 
     // 1. 여러 권한을 요청할 수 있는 런처로 변경
     private val requestPermissionsLauncher = registerForActivityResult(
@@ -46,12 +46,12 @@ class MainActivity : ComponentActivity() {
         checkAndRequestVehiclePermissions()
 
         setContent {
-            val mainState by mainViewModel.uiState.collectAsState()
+            val mainState by drivingAssistantViewModel.uiState.collectAsState()
             MyAppTheme {
                 AppRoot(
                     isListening = mainState.isListening,
                     onListeningButtonClick = {
-                        mainViewModel.handleIntent(MainEvent.StartListening)
+                        drivingAssistantViewModel.handleIntent(MainEvent.StartListening)
                     }
                 )
             }

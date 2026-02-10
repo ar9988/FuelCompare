@@ -1,10 +1,9 @@
 package com.example.domain.usecase
 
 import com.example.domain.model.TripEndResult
-import com.example.domain.model.VehicleIgnitionState
+import com.example.domain.model.VehicleGearState
 import com.example.domain.repository.CarRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -13,16 +12,23 @@ class MonitorTripLifecycleUseCase @Inject constructor(
     private val carRepository: CarRepository,
     private val saveTripSummaryUseCase: SaveTripSummaryUseCase
 ) {
-    operator fun invoke(): Flow<TripEndResult> = carRepository.ignitionState
-        .filter { state ->
-            // 시동이 OFF 또는 LOCK이 된 경우만 필터링
-            state == VehicleIgnitionState.OFF || state == VehicleIgnitionState.LOCK
+    private var previousGear: VehicleGearState? = null
+
+    operator fun invoke(): Flow<TripEndResult> = carRepository.gearState
+        .map { currentGear ->
+            val isRealEnd = (previousGear == VehicleGearState.DRIVE ||
+                    previousGear == VehicleGearState.REVERSE ||
+                    previousGear == VehicleGearState.NEUTRAL) &&
+                    currentGear == VehicleGearState.PARK
+
+            previousGear = currentGear
+            isRealEnd
         }
-        .distinctUntilChanged() // 상태가 확실히 변했을 때만 실행
+        .filter { it } // 위 조건이 true(주행 종료)일 때만 통과
         .map {
             try {
                 saveTripSummaryUseCase()
-                TripEndResult.Success // 저장 성공 이벤트 반환
+                TripEndResult.Success
             } catch (e: Exception) {
                 TripEndResult.Error(e.message ?: "Unknown Error")
             }

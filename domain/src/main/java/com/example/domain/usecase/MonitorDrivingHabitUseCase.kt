@@ -2,8 +2,8 @@ package com.example.domain.usecase
 
 import com.example.domain.model.DrivingAlert
 import com.example.domain.repository.CarRepository
-import com.example.domain.service.SpeechService
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
@@ -32,7 +32,7 @@ class MonitorDrivingHabitUseCase @Inject constructor(
                 else -> DrivingAlert.NORMAL
             }
             alert
-        }
+        }.distinctUntilChanged()
 
     private fun calculateAcceleration(currentSpeed: Float, currentTime: Long): Float {
         if (lastTimestamp == 0L || lastSpeed < 0f) {

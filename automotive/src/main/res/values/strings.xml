@@ -23,13 +23,6 @@
     <string name="record_screen_title">상세 주행 기록</string>
     <string name="record_toggle_daily">일별</string>
     <string name="record_toggle_monthly">월별</string>
-    <string name="record_card_purpose">용도</string>
-    <string name="record_card_duration">1연전 08:30</string>
-    <string name="record_card_distance_short">35 km</string>
-    <string name="record_card_distance_long">35 km</string>
-    <string name="record_achievement_card_title">개선 효율 굿! 🏆</string>
-    <string name="record_achievement_card_date">2024.07.20</string>
-    <string name="record_achievement_card_fuel">17.5 kmL</string>
 
 
 
@@ -63,5 +56,20 @@
     <string name="driving_event_excessive_idling">공회전이 1분 이상 지속되었습니다. 불필요한 공회전은 줄여주세요.</string>
 
     <string name="fuel_efficiency_text">연비는 %.2f km/l 입니다.</string>
+    <string name="grade_excellent">최고</string>
+    <string name="desc_excellent">최고의 연비 상태입니다</string>
+    <string name="grade_normal">보통</string>
+    <string name="desc_normal">평균적인 연비 상태입니다</string>
+    <string name="grade_poor">나쁨</string>
+    <string name="desc_poor">나쁜 연비 상태 입니다</string>
 
+    <string name="avg_efficiency">%.1f km/L</string>
+    <string name="avg_km">%.1f km/L</string>
+    <string name="label_avg_eff">평균 연비</string>
+    <string name="label_mileage">주행 거리</string>
+    <string name="label_harsh_accel">급가속</string>
+    <string name="label_harsh_break">급감속</string>
+    <string name="format_count">%d회</string>
+    <string name="desc_no_data">주행 데이터가 없습니다.</string>
+    <string name="instruction_choose_date">날짜 선택</string>
 </resources>

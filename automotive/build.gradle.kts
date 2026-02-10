@@ -50,6 +50,7 @@ dependencies {
     androidTestImplementation(composeBom)
     implementation(libs.compose.material3)
     implementation(libs.dagger.hilt.android)
+    implementation(libs.androidx.hilt.navigation.compose)
     ksp(libs.dagger.hilt.compiler)
     implementation(libs.compose.activity)
     implementation(libs.compose)
@@ -58,7 +59,6 @@ dependencies {
     implementation(libs.material)
     implementation(libs.icons.core)
     implementation(libs.icons.extended)
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     testImplementation(libs.junit)

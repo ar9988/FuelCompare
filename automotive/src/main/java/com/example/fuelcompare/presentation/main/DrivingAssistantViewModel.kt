@@ -39,7 +39,6 @@ class DrivingAssistantViewModel @Inject constructor(
 
     init {
         startMonitoring()
-        observeTripEnd()
     }
 
     private fun dispatch(action: MainAction) {
@@ -61,22 +60,6 @@ class DrivingAssistantViewModel @Inject constructor(
             }
             else -> {
 
-            }
-        }
-    }
-
-    private fun observeTripEnd() {
-        viewModelScope.launch {
-            monitorTripLifecycleUseCase().collect { result ->
-                when (result) {
-                    is TripEndResult.Success -> {
-                        Log.d("ViewModel", "운행 종료 및 데이터 저장 완료")
-                        // 필요하다면 UI에 "운행 요약이 저장되었습니다" 팝업 알림 Action 전송
-                    }
-                    is TripEndResult.Error -> {
-                        Log.e("ViewModel", "저장 실패: ${result.message}")
-                    }
-                }
             }
         }
     }
@@ -112,7 +95,17 @@ class DrivingAssistantViewModel @Inject constructor(
 
         // 5. 주행 종료 모니터링
         viewModelScope.launch {
-
+            monitorTripLifecycleUseCase().collect { result ->
+                when (result) {
+                    is TripEndResult.Success -> {
+                        Log.d("ViewModel", "운행 종료 및 데이터 저장 완료")
+                        // 필요하다면 UI에 "운행 요약이 저장되었습니다" 팝업 알림 Action 전송
+                    }
+                    is TripEndResult.Error -> {
+                        Log.e("ViewModel", "저장 실패: ${result.message}")
+                    }
+                }
+            }
         }
     }
 

@@ -1,6 +1,7 @@
 package com.example.domain.usecase
 
 import com.example.domain.model.DrivingAlert
+import com.example.domain.model.VehicleGearState
 import com.example.domain.repository.CarRepository
 import com.example.domain.service.SpeechService
 import kotlinx.coroutines.flow.Flow
@@ -17,14 +18,14 @@ class MonitorCoastingUseCase @Inject constructor(
     operator fun invoke(): Flow<DrivingAlert> = combine(
         carRepository.observeSpeed(),
         carRepository.observeEngineRpm(),
-        carRepository.observeGear()
+        carRepository.gearState
     ) { speed, rpm, gear ->
         // 조건: 속도 30km/h(8.3m/s) 이상 + 기어 Drive(8) + RPM 낮음(가속 안함)
-        val isCoasting = speed > 8.3f && gear == 8 && rpm < 1100f
+        val isCoasting = speed > 8.3f && gear == VehicleGearState.DRIVE && rpm < 1100f
 
         if (isCoasting) {
             if (coastingStartTime == 0L) coastingStartTime = System.currentTimeMillis()
-            if (System.currentTimeMillis() - coastingStartTime >= 3000L) { // 3초 이상 유지 시
+            if (System.currentTimeMillis() - coastingStartTime >= 3000L  && !hasAlertedForCurrentSession) { // 3초 이상 유지 시
                 hasAlertedForCurrentSession = true
                 DrivingAlert.INERTIAL_DRIVING
             } else{

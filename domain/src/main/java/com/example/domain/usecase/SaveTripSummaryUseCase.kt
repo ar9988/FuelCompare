@@ -11,11 +11,10 @@ class SaveTripSummaryUseCase @Inject constructor(
     private val historyRepository: HistoryRepository
 ) {
     suspend operator fun invoke() {
-        // 1. 필요한 모든 데이터를 유즈케이스 내부에서 수집
         val totalDist = carRepository.getTotalDistance()
 
-        // 데이터가 유의미할 때만 저장하는 '비즈니스 규칙'도 여기에 위치
-        if (totalDist > 100.0) {
+        println("DEBUG_SAVE: Total distance calculated: $totalDist")
+        if (totalDist > 10.0) { // 최소 주행거리
             val currentEfficiency = carRepository.fuelEfficiency.value
             val (accelCount, brakeCount) = recordDrivingEventUseCase.getCounts()
             val history = TripHistory(

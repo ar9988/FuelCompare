@@ -2,6 +2,7 @@ package com.example.domain.usecase
 
 import com.example.domain.model.SpeechState
 import com.example.domain.model.VoiceCommandResult
+import com.example.domain.repository.HistoryRepository
 import com.example.domain.service.SpeechService
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -12,7 +13,7 @@ import javax.inject.Inject
 
 class ProcessFuelVoiceCommandUseCase @Inject constructor(
     private val getFuelEfficiencyUseCase: GetFuelEfficiencyUseCase,
-    private val speechService: SpeechService
+    private val speechService: SpeechService,
 ) {
     operator fun invoke(): Flow<VoiceCommandResult> = callbackFlow {
         // 1. 음성 인식 시작
