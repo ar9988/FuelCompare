@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.domain.usecase.GetFuelEfficiencyUseCase
-import com.example.domain.usecase.GetGearUseCase
+import com.example.domain.usecase.GetTripStateUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,7 +14,7 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val getFuelEfficiencyUseCase: GetFuelEfficiencyUseCase,
-    private val getGearUseCase: GetGearUseCase,
+    private val getTripStateUseCase: GetTripStateUseCase,
     private val homeReducer: HomeReducer
 ) : ViewModel() {
 
@@ -25,8 +25,8 @@ class HomeViewModel @Inject constructor(
         // 시동 상태 구독
         viewModelScope.launch {
             //gear 로 시작 측정하게 변경
-            getGearUseCase().collect { gearState ->
-                _uiState.value = homeReducer.reduce(_uiState.value, HomeEvent.UpdateGearState(gearState))
+            getTripStateUseCase().collect { tripState ->
+                _uiState.value = homeReducer.reduce(_uiState.value, HomeEvent.UpdateTripState(tripState))
             }
         }
 

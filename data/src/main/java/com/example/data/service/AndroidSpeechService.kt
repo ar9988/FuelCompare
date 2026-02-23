@@ -15,7 +15,7 @@ import com.example.domain.model.SpeechState
 import com.example.domain.service.SpeechService
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import java.util.Locale
 import javax.inject.Inject
 
@@ -25,9 +25,10 @@ class AndroidSpeechService @Inject constructor(
 
     private var speechRecognizer: SpeechRecognizer? = null
     private var tts: TextToSpeech? = null
-    private val _speechState = MutableStateFlow<SpeechState>(SpeechState.Idle)
-    private var lastSpokenTime = 0L
-    private val MIN_INTERVAL = 5000L // 5초 쿨타임
+    private val _speechState = MutableSharedFlow<SpeechState>(
+        replay = 0,
+        extraBufferCapacity = 1
+    )
 
     init {
         initTts()
@@ -49,6 +50,9 @@ class AndroidSpeechService @Inject constructor(
 
     override fun startListening(): Flow<SpeechState> {
         Handler(Looper.getMainLooper()).post {
+            // 기존 리스너가 있다면 취소
+            speechRecognizer?.cancel()
+
             if (speechRecognizer == null) {
                 speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context).apply {
                     setRecognitionListener(this@AndroidSpeechService)
@@ -68,18 +72,12 @@ class AndroidSpeechService @Inject constructor(
     override fun stopListening() {
         Handler(Looper.getMainLooper()).post {
             speechRecognizer?.stopListening()
-            _speechState.value = SpeechState.Idle
+            _speechState.tryEmit(SpeechState.Idle)
         }
     }
 
     override fun speak(text: String) {
-        val currentTime = System.currentTimeMillis()
-        if (currentTime - lastSpokenTime >= MIN_INTERVAL) {
-            tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "TTS_ID")
-            lastSpokenTime = currentTime
-        } else {
-            Log.d("SpeechService", "🚫 발화 간격 제한으로 생략됨: $text")
-        }
+        tts?.speak(text, TextToSpeech.QUEUE_ADD, null, "TTS_ID_${System.currentTimeMillis()}")
     }
 
     override fun shutdown() {
@@ -91,7 +89,7 @@ class AndroidSpeechService @Inject constructor(
     override fun onResults(results: Bundle?) {
         val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
         if (!matches.isNullOrEmpty()) {
-            _speechState.value = SpeechState.Success(matches[0])
+            _speechState.tryEmit(SpeechState.Success(matches[0]))
         }
     }
 
@@ -105,16 +103,17 @@ class AndroidSpeechService @Inject constructor(
     }
 
     override fun onEndOfSpeech() {
-        _speechState.value = SpeechState.Idle
+        _speechState.tryEmit(SpeechState.Idle)
     }
 
     override fun onError(error: Int) {
+        Log.d("SpeechService",error.toString())
         val message = when (error) {
             SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "권한 없음"
             SpeechRecognizer.ERROR_NETWORK -> "네트워크 에러"
             else -> "에러 발생: $error"
         }
-        _speechState.value = SpeechState.Error(message)
+        _speechState.tryEmit(SpeechState.Error(message))
     }
 
     override fun onEvent(eventType: Int, params: Bundle?) {
@@ -124,7 +123,7 @@ class AndroidSpeechService @Inject constructor(
     }
 
     override fun onReadyForSpeech(params: Bundle?) {
-        _speechState.value = SpeechState.Listening
+        _speechState.tryEmit(SpeechState.Listening)
     }
 
 }

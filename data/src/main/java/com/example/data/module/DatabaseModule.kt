@@ -16,7 +16,9 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): AppDatabase =
-        Room.databaseBuilder(context, AppDatabase::class.java, "fuel_db").build()
+        Room.databaseBuilder(context, AppDatabase::class.java, "history_db")
+            .fallbackToDestructiveMigration()
+            .build()
 
     @Provides
     fun provideTripDao(db: AppDatabase) = db.tripHistoryDao()

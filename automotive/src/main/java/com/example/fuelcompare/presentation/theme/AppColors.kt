@@ -25,7 +25,10 @@ data class AppColors(
     val regulationGreen: Color,
     val regulationYellow: Color,
     val regulationOrange: Color,
-    val regulationRed: Color
+    val regulationRed: Color,
+
+    val bgGradientStart: Color,
+    val bgGradientEnd: Color
 )
 
 val LightAppColors = AppColors(
@@ -45,7 +48,9 @@ val LightAppColors = AppColors(
     regulationGreen = regulation_green_light,
     regulationYellow = regulation_yellow_light,
     regulationOrange = regulation_orange_light,
-    regulationRed = regulation_red_light
+    regulationRed = regulation_red_light,
+    bgGradientStart = bg_gradient_start_light,
+    bgGradientEnd = bg_gradient_end_light
 )
 
 val DarkAppColors = AppColors(
@@ -65,7 +70,9 @@ val DarkAppColors = AppColors(
     regulationGreen = regulation_green_dark,
     regulationYellow = regulation_yellow_dark,
     regulationOrange = regulation_orange_dark,
-    regulationRed = regulation_red_dark
+    regulationRed = regulation_red_dark,
+    bgGradientStart = bg_gradient_start_dark,
+    bgGradientEnd = bg_gradient_end_dark
 )
 
 val LocalAppColors = staticCompositionLocalOf { LightAppColors }

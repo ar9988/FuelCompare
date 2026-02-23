@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -21,6 +22,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -37,10 +39,9 @@ fun DetailScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
-    ) {
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ){
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -253,10 +254,8 @@ fun DrivingDetailPanel(
     selectedPoint: ChartPoint?,
     selectedPeriod: DisplayPeriod
 ) {
-
     val displayDate = remember(selectedPoint, selectedPeriod) {
         if (selectedPoint == null) return@remember ""
-
         val date = java.util.Date(selectedPoint.dateMillis)
         val pattern = if (selectedPeriod == DisplayPeriod.DAILY) {
             java.text.DateFormat.getDateInstance(java.text.DateFormat.LONG)
@@ -265,13 +264,12 @@ fun DrivingDetailPanel(
         }
         pattern.format(date)
     }
+
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(
-                alpha = 0.3f
-            )
+            containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f)
         )
     ) {
         Column(modifier = Modifier.padding(24.dp)) {
@@ -285,35 +283,43 @@ fun DrivingDetailPanel(
 
             if (selectedPoint?.avgEfficiency == null) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(
-                        stringResource(R.string.desc_no_data),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
+                    Text(stringResource(R.string.desc_no_data), style = MaterialTheme.typography.bodyMedium)
                 }
             } else {
-                // 연비 & 거리 (큼직하게)
+                // 1. 주요 지표 (연비 & 거리)
                 DetailItemRow(
                     label = stringResource(R.string.label_avg_eff),
                     value = stringResource(R.string.avg_efficiency, selectedPoint.avgEfficiency),
                     color = MaterialTheme.appColors.informativeActive
                 )
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(12.dp))
                 DetailItemRow(
                     label = stringResource(R.string.label_mileage),
                     value = stringResource(R.string.avg_km, selectedPoint.totalDistance / 1000.0)
                 )
 
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // 2. 주행 효율 분석 (시간 비율 시각화)
+                Text(
+                    text = stringResource(R.string.label_analyze),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.outline
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // 경제 운전(Cruise + Coasting) vs 공회전 비율 그래프
+                DrivingEfficiencyGraph(selectedPoint)
+
                 Spacer(modifier = Modifier.weight(1f))
 
-                // 운전 습관 (급가감속)
+                // 3. 운전 습관 (급가감속 카운트)
                 Surface(
                     color = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
+                        modifier = Modifier.fillMaxWidth().padding(16.dp),
                         horizontalArrangement = Arrangement.SpaceAround
                     ) {
                         HabitStat(
@@ -333,6 +339,57 @@ fun DrivingDetailPanel(
     }
 }
 
+@Composable
+fun DrivingEfficiencyGraph(point: ChartPoint) {
+    // 백분율 계산
+    val total = point.totalDuration.toDouble().coerceAtLeast(1.0)
+    val ecoRatio = ((point.cruiseDuration + point.coastingDuration) / total).coerceIn(0.0, 1.0)
+    val idlingRatio = (point.idlingDuration / total).coerceIn(0.0, 1.0)
+    val normalRatio = (1.0 - ecoRatio - idlingRatio).coerceAtLeast(0.0)
+
+    val ecoColor = MaterialTheme.appColors.informativePositive // 초록 (경제)
+    val idlingColor = MaterialTheme.appColors.informativeNegative // 빨강 (공회전)
+    val normalColor = MaterialTheme.colorScheme.outlineVariant // 회색 (일반)
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        // 수평 스택 바
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(12.dp)
+                .clip(RoundedCornerShape(6.dp))
+                .background(normalColor)
+        ) {
+            if (ecoRatio > 0) Box(Modifier.fillMaxHeight().weight(ecoRatio.toFloat()).background(ecoColor))
+            if (normalRatio > 0) Box(Modifier.fillMaxHeight().weight(normalRatio.toFloat()).background(normalColor))
+            if (idlingRatio > 0) Box(Modifier.fillMaxHeight().weight(idlingRatio.toFloat()).background(idlingColor))
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // 범례 및 상세 퍼센트
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            EfficiencyLegendItem(
+                stringResource(R.string.label_eco_drive), "${(ecoRatio * 100).roundToInt()}%", ecoColor)
+            EfficiencyLegendItem(
+                stringResource(R.string.label_idling), "${(idlingRatio * 100).roundToInt()}%", idlingColor)
+        }
+    }
+}
+
+@Composable
+fun EfficiencyLegendItem(label: String, percentage: String, color: Color) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(color))
+        Spacer(modifier = Modifier.width(6.dp))
+        Text(text = label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.outline)
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(text = percentage, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
+    }
+}
 
 @Composable
 fun DetailItemRow(
@@ -362,15 +419,19 @@ fun HabitStat(
 ) {
     val isNegative = count >= selectedPeriod.threshold
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.titleLarge,
+            style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.outline
         )
+
         Text(
             text = stringResource(R.string.format_count, count),
-            style = MaterialTheme.typography.labelLarge,
+            style = MaterialTheme.typography.bodyLarge,
             color = if (isNegative)
                 MaterialTheme.appColors.informativeNegative
             else

@@ -6,7 +6,7 @@ import com.example.data.dao.TripHistoryDao
 import com.example.data.entity.TripHistoryEntity
 
 
-@Database(entities = [TripHistoryEntity::class], version = 1, exportSchema = false)
+@Database(entities = [TripHistoryEntity::class], version = 3, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun tripHistoryDao(): TripHistoryDao
 }

@@ -1,17 +1,16 @@
 package com.example.domain.model
 
-data class TripHistory(
-    val id: Long = 0,
-    val date: Long,
+data class DrivingHabitSummary(
     val avgEfficiency: Float,
     val harshAccelCount: Int,
     val harshBrakeCount: Int,
     val totalDistance: Double,
-    val coastingCount: Int,
-    val cruiseCount: Int,
+    val idlingCount: Int,
+    val coastingCount:Int,
+    val cruiseCount:Int,
+    val idlingTimeMillis: Long,
     val coastingTimeMillis: Long,
     val cruiseTimeMillis: Long,
-    val idlingCount: Int,
-    val idlingTimeMillis: Long,
-    val tripDuration:Long
+    val tripCount:Int,
+    val totalDurationMillis: Long
 )

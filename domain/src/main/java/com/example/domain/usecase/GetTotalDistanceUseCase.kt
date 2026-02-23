@@ -1,11 +1,10 @@
 package com.example.domain.usecase
 
-import com.example.domain.repository.CarRepository
-import kotlinx.coroutines.flow.Flow
+import com.example.domain.service.TripManager
 import javax.inject.Inject
 
 class GetTotalDistanceUseCase @Inject constructor(
-    private val carRepository: CarRepository
+    private val tripManager: TripManager
 ) {
-    operator fun invoke() : Double = carRepository.getTotalDistance()
+    operator fun invoke() : Double = tripManager.totalDistanceMeters
 }

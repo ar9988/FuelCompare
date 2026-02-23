@@ -33,6 +33,7 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -40,11 +41,18 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+    configurations.all {
+        resolutionStrategy {
+            force("org.jetbrains:annotations:23.0.0")
+        }
+        exclude(group = "com.intellij", module = "annotations")
+    }
 }
 
 dependencies {
     implementation(project(":data"))
     implementation(project(":domain"))
+    implementation(libs.androidx.room.compiler)
     val composeBom = platform(libs.compose.bom)
     implementation(composeBom)
     androidTestImplementation(composeBom)

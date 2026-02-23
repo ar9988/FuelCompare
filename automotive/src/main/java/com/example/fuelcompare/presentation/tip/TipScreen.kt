@@ -1,7 +1,6 @@
 package com.example.fuelcompare.presentation.tip
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
@@ -9,111 +8,108 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.EnergySavingsLeaf
-import androidx.compose.material.icons.filled.Speed
-import androidx.compose.material.icons.filled.TrendingDown
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.fuelcompare.R
 import com.example.fuelcompare.presentation.theme.appColors
 
 @Composable
-fun TipScreen(navController: NavController) {
-    // 이 화면의 UI를 호출합니다.
-    DrivingTipScreen(userName = "OO") // 실제 앱에서는 사용자 정보를 받아와야 합니다.
-}
+fun TipScreen(
+    navController: NavController,
+    viewModel: TipViewModel = hiltViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-@Composable
-fun DrivingTipScreen(userName: String) {
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 24.dp, vertical = 32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(32.dp, Alignment.CenterVertically),
-        ) {
-            // OO님의 운전 습관 요약
-            Text(
-                text = stringResource(id = R.string.tip_screen_user_summary_title, userName),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-
-            // 운전 습관 요약 카드
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                // 급가속 카드
-                HabitSummaryCard(
-                    modifier = Modifier.weight(1f),
-                    title = stringResource(R.string.habit_harsh_acceleration_title, 5),
-                    description = stringResource(R.string.habit_harsh_acceleration_desc),
-                    icon = Icons.Default.   TrendingDown,
-                    iconDesc = stringResource(R.string.content_desc_harsh_acceleration),
-                    cardColor = MaterialTheme.appColors.regulationRed.copy(alpha = 0.8f),
-                    borderColor = MaterialTheme.appColors.regulationRed
-                )
-                // 타력 주행 카드
-                HabitSummaryCard(
-                    modifier = Modifier.weight(1f),
-                    title = stringResource(R.string.habit_coasting_title, 7),
-                    description = stringResource(R.string.habit_coasting_desc),
-                    icon = Icons.Default.EnergySavingsLeaf,
-                    iconDesc = stringResource(R.string.content_desc_coasting),
-                    cardColor = MaterialTheme.appColors.regulationGreen.copy(alpha = 0.8f),
-                    borderColor = MaterialTheme.appColors.regulationGreen
-                )
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ){
+        if (uiState.isLoading) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
             }
-
-            // 연비 개선을 위한 추천 팁
-            Text(
-                text = stringResource(id = R.string.tip_screen_recommendation_title),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-
-            // 추천 팁 카드 목록
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 24.dp)
             ) {
-                RecommendationTipCard(
-                    modifier = Modifier.weight(1f),
-                    title = stringResource(R.string.rec_tip_gentle_start_title),
-                    description = stringResource(R.string.rec_tip_gentle_start_desc),
-                    icon = Icons.Default.Speed
-                )
-                RecommendationTipCard(
-                    modifier = Modifier.weight(1f),
-                    title = stringResource(R.string.rec_tip_steady_speed_title),
-                    description = stringResource(R.string.rec_tip_steady_speed_desc),
-                    icon = Icons.Default.Speed // 아이콘은 디자인에 맞게 변경
-                )
-                RecommendationTipCard(
-                    modifier = Modifier.weight(1f),
-                    title = stringResource(R.string.rec_tip_no_idling_title),
-                    description = stringResource(R.string.rec_tip_no_idling_desc),
-                    icon = Icons.Default.Speed // 아이콘은 디자인에 맞게 변경
-                )
+                Column(
+                    modifier = Modifier.align(Alignment.Center),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(24.dp)
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.tip_screen_summary_title),
+                        style = MaterialTheme.typography.titleLarge
+                    )
+
+                    // 상단 요약 카드 영역
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(IntrinsicSize.Max), // 💡 높이를 자식 중 최대값으로 고정
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        uiState.summaries.forEach { summary ->
+                            HabitSummaryCard(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight(), // 💡 최대 높이까지 채움
+                                title = summary.title,
+                                description = summary.description,
+                                icon = summary.icon,
+                                cardColor = when (summary.color) {
+                                    CardHighlightType.ALERT -> MaterialTheme.appColors.regulationRed
+                                    CardHighlightType.SUCCESS -> MaterialTheme.appColors.regulationGreen
+                                    else -> MaterialTheme.appColors.alphaGray100
+                                },
+                                borderColor = MaterialTheme.appColors.alphaWhite100,
+                                iconDesc = ""
+                            )
+                        }
+                    }
+
+                    Text(
+                        text = stringResource(id = R.string.tip_screen_recommendation_title),
+                        style = MaterialTheme.typography.titleMedium
+                    )
+
+                    // 💡 하단 추천 팁 카드 영역 수정
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(IntrinsicSize.Max), // 💡 Row의 높이를 가장 긴 카드의 높이에 맞춤
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        uiState.recommendations.forEach { tip ->
+                            RecommendationTipCard(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight(), // 💡 결정된 Row의 높이만큼 꽉 채움
+                                title = tip.title,
+                                description = tip.description,
+                                icon = tip.icon
+                            )
+                        }
+                    }
+                }
             }
         }
     }
 }
+
 
 @Composable
 fun HabitSummaryCard(

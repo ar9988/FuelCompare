@@ -17,5 +17,9 @@ data class ChartPoint(
     val avgEfficiency: Float?,// 데이터가 없으면 null
     val harshAccelCount: Int = 0,
     val harshBrakeCount: Int = 0,
-    val totalDistance: Double = 0.0
+    val totalDistance: Double = 0.0,
+    val totalDuration: Long,
+    val idlingDuration: Long,
+    val cruiseDuration: Long,
+    val coastingDuration: Long,
 )

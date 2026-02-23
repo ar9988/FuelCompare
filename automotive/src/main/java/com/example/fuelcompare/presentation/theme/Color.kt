@@ -90,6 +90,14 @@ val regulation_orange_dark = Color(0xFFFF8A00)
 val regulation_red_light = Color(0xFFF62E24)
 val regulation_red_dark = Color(0xFFFF4339)
 
+// Background Gradient Colors - Light
+val bg_gradient_start_light = Color(0xFFF4F6F9) // 상단: 약간의 푸른빛이 도는 아주 연한 회색
+val bg_gradient_end_light = Color(0xFFD5DBE4)   // 하단: 확실히 티가 나는 묵직한 실버/스틸 그레이
+
+// Background Gradient Colors - Dark
+val bg_gradient_start_dark = solid_dark_gray100 // 상단: 0xFF313236 (기존보다 한 단계 더 밝은 다크그레이)
+val bg_gradient_end_dark = Color(0xFF050506)    // 하단: 거의 완전한 블랙에 가까운 심연의 색
+
 
 
 

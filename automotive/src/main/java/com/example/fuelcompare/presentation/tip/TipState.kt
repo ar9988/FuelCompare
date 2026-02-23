@@ -1,4 +1,7 @@
 package com.example.fuelcompare.presentation.tip
 
-class TipState {
-}
+data class TipState(
+    val isLoading: Boolean = true,
+    val summaries: List<SummaryUiModel> = emptyList(),
+    val recommendations: List<RecommendationUiModel> = emptyList(),
+)

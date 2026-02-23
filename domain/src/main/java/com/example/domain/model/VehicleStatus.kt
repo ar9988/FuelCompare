@@ -1,7 +1,6 @@
 package com.example.domain.model
 
-
 data class VehicleStatus(
-    val totalMileage: Double,
-    val remainingBattery: Double
+    val efficiency: FuelEfficiencyState,
+    val alert: SpeechTag
 )

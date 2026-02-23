@@ -1,8 +1,9 @@
 package com.example.domain.usecase
 
+import com.example.domain.model.FuelEfficiencyState
 import com.example.domain.model.SpeechState
+import com.example.domain.model.TripState
 import com.example.domain.model.VoiceCommandResult
-import com.example.domain.repository.HistoryRepository
 import com.example.domain.service.SpeechService
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -13,34 +14,54 @@ import javax.inject.Inject
 
 class ProcessFuelVoiceCommandUseCase @Inject constructor(
     private val getFuelEfficiencyUseCase: GetFuelEfficiencyUseCase,
+    private val getTripStateUseCase: GetTripStateUseCase,
     private val speechService: SpeechService,
 ) {
-    operator fun invoke(): Flow<VoiceCommandResult> = callbackFlow {
-        // 1. 음성 인식 시작
-        val collectJob = launch{
+    operator fun invoke(target: String): Flow<VoiceCommandResult> = callbackFlow {
+        val collectJob = launch {
             speechService.startListening().collect { state ->
                 when (state) {
                     is SpeechState.Success -> {
                         val text = state.text
-                        if (text.contains("연비")) {
-                            val efficiency = getFuelEfficiencyUseCase().first()
-                            trySend(VoiceCommandResult.FuelEfficiency(efficiency))
+
+                        if (text.contains(target)) {
+                            val tripState = getTripStateUseCase().first()
+                            when {
+                                tripState is TripState.Driving -> {
+                                    when (val fuelEfficiency = getFuelEfficiencyUseCase().first()) {
+                                        is FuelEfficiencyState.Ready -> {
+                                            trySend(VoiceCommandResult.FuelEfficiency(fuelEfficiency.efficiency))
+                                        }
+
+                                        is FuelEfficiencyState.Initializing -> {
+                                            trySend(VoiceCommandResult.Calculating)
+                                        }
+                                    }
+                                }
+                                else -> {
+                                    trySend(VoiceCommandResult.NotStarted)
+                                }
+                            }
+                            close()
                         } else {
                             trySend(VoiceCommandResult.Misunderstood)
+                            close()
                         }
-                        close()
                     }
                     is SpeechState.Error -> {
                         trySend(VoiceCommandResult.Error(state.message))
                         close()
                     }
-                    else -> { // 음성 입력 대기상태
+                    SpeechState.Listening -> {
+
                     }
+                    else -> {}
                 }
             }
         }
+
         awaitClose {
-            collectJob.cancel() // 수집 중단
+            collectJob.cancel()
             speechService.stopListening()
         }
     }

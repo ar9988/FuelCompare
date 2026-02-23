@@ -8,17 +8,11 @@ import kotlinx.coroutines.flow.StateFlow
 interface CarRepository {
     val ignitionState: StateFlow<VehicleIgnitionState>
 
-    val fuelEfficiency: StateFlow<Float>
-
     val gearState: StateFlow<VehicleGearState>
 
     fun observeSpeed(): Flow<Float>
 
     fun observeFuelLevel(): Flow<Float>
 
-    fun getEfficiency(): Flow<Float>
-
     fun observeEngineRpm(): Flow<Float>
-
-    fun getTotalDistance(): Double
 }

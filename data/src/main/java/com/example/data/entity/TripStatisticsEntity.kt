@@ -5,5 +5,12 @@ data class TripStatisticsEntity(
     val avgEfficiency: Float,
     val harshAccelCount: Int,
     val harshBrakeCount: Int,
-    val totalDistance: Double
+    val totalDistance: Double,
+    val coastingCount:Int,
+    val cruiseCount:Int,
+    val idlingCount: Int,
+    val idlingTimeMillis: Long,
+    val coastingTimeMillis: Long,
+    val cruiseTimeMillis: Long,
+    val totalTripTime: Long,
 )
