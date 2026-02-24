@@ -1,10 +1,10 @@
 # 🚗 AAOS 기반 실시간 주행 모니터링 & 음성 비서 앱
 
-> **Android Automotive OS(AAOS)** 환경에서 VHAL 센서 데이터를 실시간으로 분석하여 **연비 모니터링, 운전 습관 분석, 그리고 지능형 음성 피드백(STT/TTS)**을 제공하는 안드로이드 애플리케이션입니다.
+> **Android Automotive OS(AAOS)** 환경에서 VHAL 센서 데이터를 실시간으로 분석하여 연비 모니터링, 운전 습관 분석, 그리고 지능형 음성 피드백(STT/TTS)을 제공하는 안드로이드 애플리케이션입니다.
 
 ## 🎥 Demo / Preview
 
-<video src="Demo/preview.mp4" controls width="700"></video>
+<video src="Demo/preview.mp4" controls="controls" width="100%"></video>
 
 ## ✨ 핵심 기능 (Key Features)
 
