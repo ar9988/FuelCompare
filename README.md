@@ -5,7 +5,9 @@
 ## 🎥 Demo / Preview
 
 
-https://github.com/user-attachments/assets/d9d72f7d-863b-46b4-9532-f6f6b3c82af9
+
+https://github.com/user-attachments/assets/9caf0124-2300-49d3-ba45-f522284a8770
+
 
 
 
