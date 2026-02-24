@@ -4,7 +4,10 @@
 
 ## 🎥 Demo / Preview
 
-<video src="Demo/preview.mp4" controls="controls" width="100%"></video>
+
+https://github.com/user-attachments/assets/d9d72f7d-863b-46b4-9532-f6f6b3c82af9
+
+
 
 ## ✨ 핵심 기능 (Key Features)
 
