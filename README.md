@@ -4,7 +4,7 @@
 
 ## 🎥 Demo / Preview
 
-<video src="Demo/demo.mp4" controls width="700"></video>
+<video src="Demo/preview.mp4" controls width="700"></video>
 
 ## ✨ 핵심 기능 (Key Features)
 
